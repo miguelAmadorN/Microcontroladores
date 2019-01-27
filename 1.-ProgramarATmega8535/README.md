@@ -11,7 +11,7 @@ instalar AVRdude.
 
 Para la plataformas de Windows leer: USBASP-UG.pdf
 
-Una vez instalado AVRdude y el programa precompilado a grabar (*.hex)
+Una vez instalado AVRdude y precompilado el programa a grabar (*.hex)
 es necesario conectar el microcontrolador y el programador como se
 muestra en la figura.
 
@@ -19,10 +19,14 @@ muestra en la figura.
 
 Posteriormente en una consola de comandos ingresar:
 
-avrdude -p <DEVICE> -P usb -c usbasp -U flash:w:<FILE>
+avrdude -p **DEVICE** -P usb -c usbasp -U flash:w:**FILE**
 
 Para ATmega8535
 
-<DEVICE> m8535
+**DEVICE** m8535
 
-<FILE> *.hex
+**FILE** *.hex
+
+Ejemplo:
+
+avrdude -p m8535 -P usb -c usbasp -U flash:w:main.hex
