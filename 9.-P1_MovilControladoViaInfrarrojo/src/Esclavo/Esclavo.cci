@@ -1,0 +1,6 @@
+VERSION:3 SOURCE_TIMESTAMP:4E4D803B
+NODE:I LEVEL:0 LINE:23 "C:\cvavreval\inc\mega8535.h"
+NODE:I LEVEL:0 LINE:24 "C:\cvavreval\inc\delay.h"
+NODE:V LEVEL:0 LINE:26 "anterior -> R5"
+NODE:F LEVEL:0 LINE:28 "getPIN(void)"
+NODE:F LEVEL:0 LINE:57 "main(void)"
