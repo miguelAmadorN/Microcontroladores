@@ -1,0 +1,24 @@
+RAM Allocation [bytes]
+Variable                                                                          Address   Size
+------------------------------------------------------------------------------------------------
+movements                                                                         0x00E0      10
+
+EEPROM Allocation [bytes]
+Variable                                                                          Address   Size
+------------------------------------------------------------------------------------------------
+
+Register Allocation
+Variable                                                                          Register  Size
+------------------------------------------------------------------------------------------------
+counter                                                                           R5           1
+playCounter                                                                       R4           1
+var                                                                               R7           1
+previousValue                                                                     R6           1
+aux                                                                               R9           1
+nothing                                                                           R8           1
+
+FLASH Allocation [words]
+Function                                                                          Address   Size
+------------------------------------------------------------------------------------------------
+getMovement                                                                       0x0002F     29
+main                                                                              0x0004C    140
