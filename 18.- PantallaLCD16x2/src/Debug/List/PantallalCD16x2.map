@@ -1,0 +1,46 @@
+RAM Allocation [bytes]
+Variable                                                                          Address   Size
+------------------------------------------------------------------------------------------------
+calculo                                                                           0x00E0       4
+Mes                                                                               0x00E4       1
+DecimasSegundos                                                                   0x00E5       1
+Anio                                                                              0x00E6       2
+_base_y (alcd.lib)                                                                0x00E8       4
+_lcd_x                                                                            0x00EC       1
+_lcd_y                                                                            0x00ED       1
+_lcd_maxx                                                                         0x00EE       1
+
+EEPROM Allocation [bytes]
+Variable                                                                          Address   Size
+------------------------------------------------------------------------------------------------
+
+Register Allocation
+Variable                                                                          Register  Size
+------------------------------------------------------------------------------------------------
+adc                                                                               R5           1
+numero                                                                            R6,R7        2
+Unidades                                                                          R4           1
+Decenas                                                                           R9           1
+Decimas                                                                           R8           1
+Hora                                                                              R11          1
+Minutos                                                                           R10          1
+Segundos                                                                          R13          1
+Dia                                                                               R12          1
+
+FLASH Allocation [words]
+Function                                                                          Address   Size
+------------------------------------------------------------------------------------------------
+read_adc                                                                          0x0005F     13
+muestra_leyenda                                                                   0x0006C      6
+muestra_temperatura                                                               0x00072     71
+muestra_fecha                                                                     0x000B9     58
+muestra_hora                                                                      0x000F3     41
+actualizar                                                                        0x0011C     88
+main                                                                              0x00174     68
+_lcd_write_nibble_G100                                                            0x001B8     14
+_lcd_write_data                                                                   0x001C6     13
+lcd_gotoxy                                                                        0x001D3     18
+lcd_clear                                                                         0x001E5     12
+lcd_putchar                                                                       0x001F1     30
+lcd_putsf                                                                         0x0020F     15
+lcd_init                                                                          0x0021E     42

@@ -4,15 +4,16 @@ Automatic Program Generator
 © Copyright 1998-2018 Pavel Haiduc, HP InfoTech s.r.l.
 http://www.hpinfotech.com
 
-Project : 
-Version : 
-Date    : 28/02/2019
-Author  : 
-Company : 
-Comments: 
+Project : Introducción a los Microcontroladores
+Version : 1.0
+Date    : 12/03/2019
+Authors : Amador Nava Miguel Ángel
+	  Hernandez Hernandez Juan Manuel
+Company : Escuela Superior de Cómputo 
+Comments: Práctica 15 B Vólmetro de 0 a 30 V
 
 
-Chip type               : ATmega8535
+Chip type               : ATmega8535L
 Program type            : Application
 AVR Core Clock frequency: 1.000000 MHz
 Memory model            : Small
@@ -21,35 +22,34 @@ Data Stack size         : 128
 *******************************************************/
 
 #include <mega8535.h>
+
 #include <delay.h>
 
-const unsigned char TOTAL  = 10;
+const char tabla7SegmentosAnodo [10]={0xc0 ,0xf9 ,0xa4 ,0xb0 ,0x99 ,0x92 ,0x83 ,0xf8 ,0x80 ,0x90}; 
+#define decimas  PORTC.0
+#define unidades PORTC.1
+#define decenas  PORTC.2
+#define dp       PORTB.7
+unsigned char adc;
+int calculo;
+char Decenas, Unidades, Decimas;
 
-const unsigned char AHEAD  =  1;
-const unsigned char BEHIND =  2;
-const unsigned char LEFT   =  4;
-const unsigned char RIGHT  =  8;
-const unsigned char GO     = 16;
-const unsigned char PAUSE  = 32;
-const unsigned char CLEAR  = 64;
+// Voltage Reference: AVCC pin
+#define ADC_VREF_TYPE ((0<<REFS1) | (1<<REFS0) | (1<<ADLAR))
 
-unsigned char movements[TOTAL];
-char counter, playCounter;
-unsigned char var, previousValue, aux, nothing;
-
-unsigned char getMovement(unsigned char value)
+// Read the 8 most significant bits
+// of the AD conversion result
+unsigned char read_adc(unsigned char adc_input)
 {
-    switch (value)
-           {
-           case AHEAD:
-            return 0x3;
-           case BEHIND:
-            return 0xc;
-           case LEFT:
-            return 0x2;
-           case RIGHT:
-            return 0x1;
-           }
+ADMUX=adc_input | ADC_VREF_TYPE;
+// Delay needed for the stabilization of the ADC input voltage
+delay_us(10);
+// Start the AD conversion
+ADCSRA|=(1<<ADSC);
+// Wait for the AD conversion to complete
+while ((ADCSRA & (1<<ADIF))==0);
+ADCSRA|=(1<<ADIF);
+return ADCH;
 }
 
 void main(void)
@@ -64,21 +64,21 @@ DDRA=(0<<DDA7) | (0<<DDA6) | (0<<DDA5) | (0<<DDA4) | (0<<DDA3) | (0<<DDA2) | (0<
 PORTA=(0<<PORTA7) | (0<<PORTA6) | (0<<PORTA5) | (0<<PORTA4) | (0<<PORTA3) | (0<<PORTA2) | (0<<PORTA1) | (0<<PORTA0);
 
 // Port B initialization
-// Function: Bit7=In Bit6=In Bit5=In Bit4=In Bit3=In Bit2=In Bit1=In Bit0=In 
-DDRB=(0<<DDB7) | (0<<DDB6) | (0<<DDB5) | (0<<DDB4) | (0<<DDB3) | (0<<DDB2) | (0<<DDB1) | (0<<DDB0);
-// State: Bit7=P Bit6=P Bit5=P Bit4=P Bit3=P Bit2=P Bit1=P Bit0=P 
-PORTB=(1<<PORTB7) | (1<<PORTB6) | (1<<PORTB5) | (1<<PORTB4) | (1<<PORTB3) | (1<<PORTB2) | (1<<PORTB1) | (1<<PORTB0);
+// Function: Bit7=Out Bit6=Out Bit5=Out Bit4=Out Bit3=Out Bit2=Out Bit1=Out Bit0=Out 
+DDRB=(1<<DDB7) | (1<<DDB6) | (1<<DDB5) | (1<<DDB4) | (1<<DDB3) | (1<<DDB2) | (1<<DDB1) | (1<<DDB0);
+// State: Bit7=0 Bit6=0 Bit5=0 Bit4=0 Bit3=0 Bit2=0 Bit1=0 Bit0=0 
+PORTB=(0<<PORTB7) | (0<<PORTB6) | (0<<PORTB5) | (0<<PORTB4) | (0<<PORTB3) | (0<<PORTB2) | (0<<PORTB1) | (0<<PORTB0);
 
 // Port C initialization
-// Function: Bit7=In Bit6=In Bit5=In Bit4=In Bit3=In Bit2=In Bit1=In Bit0=In 
-DDRC=(0<<DDC7) | (0<<DDC6) | (0<<DDC5) | (0<<DDC4) | (0<<DDC3) | (0<<DDC2) | (0<<DDC1) | (0<<DDC0);
-// State: Bit7=T Bit6=T Bit5=T Bit4=T Bit3=T Bit2=T Bit1=T Bit0=T 
+// Function: Bit7=Out Bit6=Out Bit5=Out Bit4=Out Bit3=Out Bit2=Out Bit1=Out Bit0=Out 
+DDRC=(1<<DDC7) | (1<<DDC6) | (1<<DDC5) | (1<<DDC4) | (1<<DDC3) | (1<<DDC2) | (1<<DDC1) | (1<<DDC0);
+// State: Bit7=0 Bit6=0 Bit5=0 Bit4=0 Bit3=0 Bit2=0 Bit1=0 Bit0=0 
 PORTC=(0<<PORTC7) | (0<<PORTC6) | (0<<PORTC5) | (0<<PORTC4) | (0<<PORTC3) | (0<<PORTC2) | (0<<PORTC1) | (0<<PORTC0);
 
 // Port D initialization
-// Function: Bit7=Out Bit6=Out Bit5=Out Bit4=Out Bit3=Out Bit2=Out Bit1=Out Bit0=Out 
-DDRD=(1<<DDD7) | (1<<DDD6) | (1<<DDD5) | (1<<DDD4) | (1<<DDD3) | (1<<DDD2) | (1<<DDD1) | (1<<DDD0);
-// State: Bit7=0 Bit6=0 Bit5=0 Bit4=0 Bit3=0 Bit2=0 Bit1=0 Bit0=0 
+// Function: Bit7=In Bit6=In Bit5=In Bit4=In Bit3=In Bit2=In Bit1=In Bit0=In 
+DDRD=(0<<DDD7) | (0<<DDD6) | (0<<DDD5) | (0<<DDD4) | (0<<DDD3) | (0<<DDD2) | (0<<DDD1) | (0<<DDD0);
+// State: Bit7=T Bit6=T Bit5=T Bit4=T Bit3=T Bit2=T Bit1=T Bit0=T 
 PORTD=(0<<PORTD7) | (0<<PORTD6) | (0<<PORTD5) | (0<<PORTD4) | (0<<PORTD3) | (0<<PORTD2) | (0<<PORTD1) | (0<<PORTD0);
 
 // Timer/Counter 0 initialization
@@ -144,11 +144,17 @@ UCSRB=(0<<RXCIE) | (0<<TXCIE) | (0<<UDRIE) | (0<<RXEN) | (0<<TXEN) | (0<<UCSZ2) 
 // The Analog Comparator's negative input is
 // connected to the AIN1 pin
 ACSR=(1<<ACD) | (0<<ACBG) | (0<<ACO) | (0<<ACI) | (0<<ACIE) | (0<<ACIC) | (0<<ACIS1) | (0<<ACIS0);
-SFIOR=(0<<ACME);
 
 // ADC initialization
-// ADC disabled
-ADCSRA=(0<<ADEN) | (0<<ADSC) | (0<<ADATE) | (0<<ADIF) | (0<<ADIE) | (0<<ADPS2) | (0<<ADPS1) | (0<<ADPS0);
+// ADC Clock frequency: 500.000 kHz
+// ADC Voltage Reference: AVCC pin
+// ADC High Speed Mode: Off
+// ADC Auto Trigger Source: ADC Stopped
+// Only the 8 most significant bits of
+// the AD conversion result are used
+ADMUX=ADC_VREF_TYPE;
+ADCSRA=(1<<ADEN) | (0<<ADSC) | (0<<ADATE) | (0<<ADIF) | (0<<ADIE) | (0<<ADPS2) | (0<<ADPS1) | (1<<ADPS0);
+SFIOR=(1<<ADHSM) | (0<<ADTS2) | (0<<ADTS1) | (0<<ADTS0);
 
 // SPI initialization
 // SPI disabled
@@ -158,68 +164,33 @@ SPCR=(0<<SPIE) | (0<<SPE) | (0<<DORD) | (0<<MSTR) | (0<<CPOL) | (0<<CPHA) | (0<<
 // TWI disabled
 TWCR=(0<<TWEA) | (0<<TWSTA) | (0<<TWSTO) | (0<<TWEN) | (0<<TWIE);
 
-
-counter = 0;
-playCounter = 0;
-previousValue = CLEAR;
-
 while (1)
-      { 
-        var = PINB ^ 0xff;
-        nothing = 1; 
+      {
+        adc = read_adc(0);
+        calculo  = adc * 300.00 / 255.00;
+        Decenas  = calculo / 100;  
+        calculo  %= 100;
+        Unidades = calculo / 10;
+        Decimas  = calculo % 10;     
         
-        if(var == CLEAR)
-        {
-            playCounter = 0;
-            counter = 0;
-            previousValue = CLEAR; 
-        }  
-        else if(var == PAUSE || previousValue == PAUSE)
-        {      
-            if(counter > 0)
-                previousValue = PAUSE;
-            else 
-                previousValue = CLEAR;
-        }  
-        
-        if(var == GO || previousValue == GO) 
-        {    
-            previousValue = GO;
-            if(playCounter < counter)    
-            {                                                
-                PORTD = getMovement(movements[playCounter]); 
-                delay_ms(1000);  
-                playCounter++;  
-                nothing = 0;
-            }
-            else if(playCounter == counter)
-            {     
-                if(counter > 0)    
-                {
-                    previousValue = PAUSE;  
-                    playCounter = 0;
-                }
-                else  
-                    previousValue = CLEAR;
-            }
-            
-        }
-         
-        else if(previousValue == CLEAR && aux != var && counter < TOTAL)  
-        {    
-            if(var == AHEAD  || var == LEFT || var == RIGHT || var == BEHIND ) 
-            {
-                movements[counter] = var;
-                counter++;
-                aux = var;
-             }  
-        }
-                         
-        if(nothing)
-            PORTD = 0;
-        
-        delay_ms(40);   
-       
+        PORTB = tabla7SegmentosAnodo[Decenas]; 
+        dp       = 1;
+        decenas  = 1;
+        unidades = 0;
+        decimas  = 0;
+        delay_ms(5);
+        PORTB = tabla7SegmentosAnodo[Unidades]; 
+        dp       = 0;
+        decenas  = 0;
+        unidades = 1;
+        decimas  = 0;
+        delay_ms(5);
+        PORTB = tabla7SegmentosAnodo[Decimas];
+        dp       = 1;
+        decenas  = 0;
+        unidades = 0;
+        decimas  = 1;
+        delay_ms(5);  
 
       }
 }

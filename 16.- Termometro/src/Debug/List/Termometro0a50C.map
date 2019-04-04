@@ -1,0 +1,24 @@
+RAM Allocation [bytes]
+Variable                                                                          Address   Size
+------------------------------------------------------------------------------------------------
+conversion                                                                        0x00E0       4
+
+EEPROM Allocation [bytes]
+Variable                                                                          Address   Size
+------------------------------------------------------------------------------------------------
+
+Register Allocation
+Variable                                                                          Register  Size
+------------------------------------------------------------------------------------------------
+adc                                                                               R5           1
+calculo                                                                           R6,R7        2
+Decenas                                                                           R4           1
+Unidades                                                                          R9           1
+Decimas                                                                           R8           1
+grados                                                                            R11          1
+
+FLASH Allocation [words]
+Function                                                                          Address   Size
+------------------------------------------------------------------------------------------------
+read_adc                                                                          0x00034     15
+main                                                                              0x00043    148

@@ -1,0 +1,8 @@
+VERSION:3 SOURCE_TIMESTAMP:4E819C33
+NODE:I LEVEL:0 LINE:23 "C:\cvavreval\inc\mega8535.h"
+NODE:I LEVEL:0 LINE:24 "C:\cvavreval\inc\delay.h"
+NODE:C LEVEL:0 LINE:25 "tabla7SegmentosAnodo -> FLASH"
+NODE:V LEVEL:0 LINE:26 "contador -> R5"
+NODE:F LEVEL:0 LINE:29 "ext_int0_isr(void)"
+NODE:F LEVEL:0 LINE:38 "ext_int1_isr(void)"
+NODE:F LEVEL:0 LINE:46 "main(void)"

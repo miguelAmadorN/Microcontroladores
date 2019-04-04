@@ -4,12 +4,13 @@ Automatic Program Generator
 © Copyright 1998-2018 Pavel Haiduc, HP InfoTech s.r.l.
 http://www.hpinfotech.com
 
-Project : 
-Version : 
+Project : Introducción a los Microcontroladores
+Version : 1.0
 Date    : 03/03/2019
-Author  : 
-Company : 
-Comments: 
+Authors : Amador Nava Miguel Ángel
+	  Hernandez Hernandez Juan Manuel
+Company : Escuela Superior de Cómputo 
+Comments: Práctica 10 Teclado Matricial
 
 
 Chip type               : ATmega8535
@@ -21,17 +22,10 @@ Data Stack size         : 128
 *******************************************************/
 
 #include <mega8535.h>
-#include <delay.h>
-#define boton PINC.0
-#define boton_guarda PINC.1
-bit botonp;
-bit botona;
-unsigned char var; //Ahora la variable se guarda en eeprom
-//const char tabla7segmentos [10]={0x3f,0x06,0x5b,0x4f,0x66,0x6d,0x7c,0x07,0x7f,0x6f};         //Para Display de Catodo
-const char tabla7segmentos [10]={0xc0 ,0xf9 ,0xa4 ,0xb0 ,0x99 ,0x92 ,0x83 ,0xf8 ,0x80 ,0x90};   //Para Display de Anodo
+ unsigned char tecla,lectura;
+const char tabla7SegmentosAnodo [16]={0xc0 ,0xf9 ,0xa4 ,0xb0 ,0x99 ,0x92 ,0x83 ,0xf8 ,0x80 ,0x90, 0x88, 0x83, 0xc6, 0xa1, 0x86, 0x8e}; 
 
-eeprom char datoaguardar;
-void checa_boton (void);
+// Declare your global variables here
 
 void main(void)
 {
@@ -51,10 +45,10 @@ DDRB=(0<<DDB7) | (0<<DDB6) | (0<<DDB5) | (0<<DDB4) | (0<<DDB3) | (0<<DDB2) | (0<
 PORTB=(0<<PORTB7) | (0<<PORTB6) | (0<<PORTB5) | (0<<PORTB4) | (0<<PORTB3) | (0<<PORTB2) | (0<<PORTB1) | (0<<PORTB0);
 
 // Port C initialization
-// Function: Bit7=In Bit6=In Bit5=In Bit4=In Bit3=In Bit2=In Bit1=In Bit0=In 
-DDRC=(0<<DDC7) | (0<<DDC6) | (0<<DDC5) | (0<<DDC4) | (0<<DDC3) | (0<<DDC2) | (0<<DDC1) | (0<<DDC0);
-// State: Bit7=P Bit6=P Bit5=P Bit4=P Bit3=P Bit2=P Bit1=P Bit0=P 
-PORTC=(1<<PORTC7) | (1<<PORTC6) | (1<<PORTC5) | (1<<PORTC4) | (1<<PORTC3) | (1<<PORTC2) | (1<<PORTC1) | (1<<PORTC0);
+// Function: Bit7=In Bit6=In Bit5=In Bit4=In Bit3=Out Bit2=Out Bit1=Out Bit0=Out 
+DDRC=(0<<DDC7) | (0<<DDC6) | (0<<DDC5) | (0<<DDC4) | (1<<DDC3) | (1<<DDC2) | (1<<DDC1) | (1<<DDC0);
+// State: Bit7=P Bit6=P Bit5=P Bit4=P Bit3=0 Bit2=0 Bit1=0 Bit0=0 
+PORTC=(1<<PORTC7) | (1<<PORTC6) | (1<<PORTC5) | (1<<PORTC4) | (0<<PORTC3) | (0<<PORTC2) | (0<<PORTC1) | (0<<PORTC0);
 
 // Port D initialization
 // Function: Bit7=Out Bit6=Out Bit5=Out Bit4=Out Bit3=Out Bit2=Out Bit1=Out Bit0=Out 
@@ -139,33 +133,64 @@ SPCR=(0<<SPIE) | (0<<SPE) | (0<<DORD) | (0<<MSTR) | (0<<CPOL) | (0<<CPHA) | (0<<
 // TWI disabled
 TWCR=(0<<TWEA) | (0<<TWSTA) | (0<<TWSTO) | (0<<TWEN) | (0<<TWIE);
 
-if (datoaguardar > 10)
-    datoaguardar = 0;
-var = datoaguardar;
-
-botona = 1;
-botonp = 1;
-
+tecla = 0;
 while (1)
       {
-        checa_boton();
-        PORTD = tabla7segmentos[var];
-        if (boton_guarda == 0) //Si se presiona el botón de guardar
-            datoaguardar = var; //se grabara la eeprom con el valor de var
-      }
-}
-
-void checa_boton (void)
-{
-    botona = boton;
-    if ((botonp == 1) && (botona == 0)) //hubo cambio de flanco de 1 a 0
-    {
-        var++; //Se incrementa la variable
-        if (var >= 10)
-            var = 0;
-        delay_ms(40); //Se coloca retardo de 40mS para eliminar rebotes
-    }
-    if ((botonp == 0) && (botona == 1)) //hubo cambio de flanco de 0 a 1
-        delay_ms(40); //Se coloca retardo de 40mS para eliminar rebotes
-    botonp = botona;
+        //C0 A C3 son de salida y son para
+        //Probar las 4 columnas
+        //Se prueba la primera columna se envía 1110
+        PORTC=0b11111110;
+        // C4 , C5 , C6 y C7 son las entradas del teclado
+        //Por eso se enmascaran con 11110000
+        lectura=PINC&0b11110000;
+        if (lectura==0b11100000)
+            tecla=0xc;
+        else if (lectura==0b11010000)
+            tecla=0xd;
+        else if (lectura==0b10110000)
+            tecla=0xe; 
+        else if (lectura==0b01110000)
+            tecla=0xf;
+        //se prueba segunda columna se envía 1101
+        PORTC=0b11111101;
+        //C4 , C5 , C6 y C7 son las entradas del teclado
+        //Por eso se enmascaran con 11110000
+        lectura=PINC&0b11110000;
+        if (lectura==0b11100000)
+            tecla=8;
+        else if (lectura==0b11010000)
+            tecla=9;
+        else if (lectura==0b10110000)
+            tecla=0xa; 
+        else if (lectura==0b01110000)
+            tecla=0xb;
+        //se prueba tercera columna se envía 1011
+        PORTC=0b11111011;
+        //C4 , C5 , C6 y C7 son las entradas del teclado
+        //Por eso se enmascaran con 11110000
+        lectura=PINC&0b11110000;
+        if (lectura==0b11100000)
+            tecla=4;
+        else if (lectura==0b11010000)
+            tecla=5;
+        else if (lectura==0b10110000)
+            tecla=6; 
+        else if (lectura==0b01110000)
+            tecla=7;    
+         //se prueba tercera columna se envía 0111
+        PORTC=0b11110111;
+        //C4 , C5 , C6 y C7 son las entradas del teclado
+        //Por eso se enmascaran con 11110000
+        lectura=PINC&0b11110000;
+        if (lectura==0b11100000)
+            tecla=0;
+        else if (lectura==0b11010000)
+            tecla=1;
+        else if (lectura==0b10110000)
+            tecla=2; 
+        else if (lectura==0b01110000)
+            tecla=3;
+        PORTD=tabla7SegmentosAnodo[tecla];
+        
+      };
 }
